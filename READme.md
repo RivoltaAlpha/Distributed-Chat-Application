@@ -35,3 +35,8 @@ The server socket is closed.
 Output:
 A message confirms that the server is shutting down, ensuring a smooth exit.
 This allows you to shut down the server by pressing Ctrl+C without leaving any active client connections hanging.
+![alt text](image-3.png)
+
+
+**Broadcast**
+![alt text](image-4.png)

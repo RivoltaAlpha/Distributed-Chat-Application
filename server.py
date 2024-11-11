@@ -33,19 +33,27 @@ def handle_client(client_socket):
             clients.remove(client_socket)
             break
 
-# Main server function
+# Main server function with shutdown handling
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((SERVER_HOST, SERVER_PORT))
     server_socket.listen()
     print("Server listening on", SERVER_HOST, ":", SERVER_PORT)
 
-    while True:
-        client_socket, client_address = server_socket.accept()
-        print(f"New connection from {client_address}")
-        clients.append(client_socket)
-        thread = threading.Thread(target=handle_client, args=(client_socket,))
-        thread.start()
+    try:
+        while True:
+            client_socket, client_address = server_socket.accept()
+            print(f"New connection from {client_address}")
+            clients.append(client_socket)
+            thread = threading.Thread(target=handle_client, args=(client_socket,))
+            thread.start()
+    except KeyboardInterrupt:
+        print("\nServer is shutting down...")
+        # Close all client connections
+        for client in clients:
+            client.close()
+        server_socket.close()
+        print("Server shutdown successfully.")
 
 if __name__ == "__main__":
     start_server()

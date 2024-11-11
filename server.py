@@ -23,6 +23,8 @@ def handle_client(client_socket):
             message = client_socket.recv(1024)
             if message:
                 print(f"Received: {message.decode('utf-8')}")
+                
+                # broadcasts message received by one client to all the other clients
                 broadcast(message, client_socket)
             else:
                 client_socket.close()
@@ -47,6 +49,7 @@ def start_server():
             clients.append(client_socket)
             thread = threading.Thread(target=handle_client, args=(client_socket,))
             thread.start()
+            # when server receives a keyboard interrupt
     except KeyboardInterrupt:
         print("\nServer is shutting down...")
         # Close all client connections

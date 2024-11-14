@@ -1,5 +1,9 @@
 import socket
 import threading
+from plyer import notification
+from playsound import playsound
+import winsound
+
 
 # Server configuration
 SERVER_HOST = '127.0.0.1'
@@ -12,6 +16,12 @@ def receive_messages(client_socket):
             message = client_socket.recv(1024).decode('utf-8')
             if message:
                 print(message)
+                winsound.PlaySound('./notification_sound.wav', winsound.SND_FILENAME)
+                notification.notify(
+                    title="New Message",
+                    message=message,
+                    timeout=5  # Notification will disappear after 5 seconds
+                )
             else:
                 print("Server closed the connection.")
                 client_socket.close()
@@ -29,7 +39,9 @@ def start_client():
     except ConnectionRefusedError:
         print("Server is unavailable. Exiting.")
         return
-    
+    # Get a username from the user
+    username = input("Enter your username: ")
+    client_socket.send(username.encode('utf-8'))
     # Start receiving thread
     thread = threading.Thread(target=receive_messages, args=(client_socket,))
     thread.start()

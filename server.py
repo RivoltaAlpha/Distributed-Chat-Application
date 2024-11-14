@@ -5,36 +5,56 @@ import threading
 SERVER_HOST = '127.0.0.1'
 SERVER_PORT = 12345
 clients = []
+usernames = {}  # Dictionary to keep track of clients and their usernames
 
 # Broadcast message to all connected clients
 def broadcast(message, client_socket):
     for client in clients:
-        if client != client_socket:
+       if client != client_socket:
             try:
                 client.send(message)
             except:
                 # Remove clients that are disconnected
+                client.close()
                 clients.remove(client)
+                
+                
 
 # Handle individual client connections
 def handle_client(client_socket):
-    while True:
-        try:
+     # Receive the username from the client
+    try:
+        username = client_socket.recv(1024).decode('utf-8')
+        usernames[client_socket] = username
+        print(f"{username} has joined the chat.")
+
+        # Notify all clients about the new connection (except the new client)
+        welcome_message = f"{username} has joined the chat."
+        broadcast(welcome_message.encode('utf-8'), client_socket)
+
+        while True:
             message = client_socket.recv(1024)
             if message:
-                print(f"Received: {message.decode('utf-8')}")
-                
-                # broadcasts message received by one client to all the other clients
-                broadcast(message, client_socket)
+                # Prepend the username to the message and broadcast it
+                print(f"{username} says: {message.decode('utf-8')}")
+                broadcast(f"{username}: {message.decode('utf-8')}".encode('utf-8'), client_socket)
             else:
-                client_socket.close()
-                clients.remove(client_socket)
-                break
-        except:
-            client_socket.close()
+                raise Exception("Client disconnected")
+    except Exception as e:
+        # Handle client disconnection
+        print(f"{username} has left the chat.")
+        # Notify all clients about the client leaving
+        broadcast(f"{username} has left the chat.".encode('utf-8'), client_socket)
+        
+        # Clean up client data
+        if client_socket in clients:
             clients.remove(client_socket)
-            break
-
+        if client_socket in usernames:
+            del usernames[client_socket]
+        # close clients socket
+        client_socket.close()
+        
+        
 # Main server function with shutdown handling
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -3,6 +3,7 @@ import threading
 
 # Server configuration
 SERVER_HOST = '127.0.0.1'
+# you can also use the IP address of the machine you want to act like a server
 SERVER_PORT = 12345
 clients = []
 usernames = {}  # Dictionary to keep track of clients and their usernames
